@@ -1,0 +1,433 @@
+{
+  "samobor_ak": {
+    "name": "AK Samobor",
+    "lat": 45.808861,
+    "lon": 15.716556
+  },
+  "dom_zdravlja_to_bregana": {
+    "name": "Samobor „Dom zdravlja“",
+    "lat": 45.805056,
+    "lon": 15.712667
+  },
+  "dom_zdravlja_to_samobor": {
+    "name": "Samobor „Dom zdravlja“",
+    "lat": 45.805333,
+    "lon": 15.713750
+  },
+  "igraliste": {
+    "name": "Samobor - igralište",
+    "lat": 45.810028,
+    "lon": 15.709056,
+    "osm_name": "Stadion"
+  },
+  "sv_helena": {
+    "name": "Sv.Helena",
+    "lat": 45.814528,
+    "lon": 15.705361,
+    "osm_name": "Sv. Helena"
+  },
+  "cvjetno_naselje": {
+    "name": "Cvjetno naselje",
+    "lat": 45.819838,
+    "lon": 15.700477
+  },
+  "bistrec": {
+    "name": "Bistrec",
+    "lat": 45.823729,
+    "lon": 15.697756
+  },
+  "lug_samoborski": {
+    "name": "Lug Samoborski",
+    "lat": 45.827938,
+    "lon": 15.694242
+  },
+  "velika_jazbina": {
+    "name": "Velika Jazbina",
+    "lat": 45.830258,
+    "lon": 15.691497
+  },
+  "podvrh": {
+    "name": "Podvrh",
+    "lat": 45.834098,
+    "lon": 15.688781
+  },
+  "bregana_trznica": {
+    "name": "Bregana - tržnica",
+    "lat": 45.837972,
+    "lon": 15.688000
+  },
+  "bregana_okretiste": {
+    "name": "Bregana – okretište",
+    "lat": 45.840046,
+    "lon": 15.688172
+  },
+  "gajeva_posta": {
+    "name": "Samobor „Gajeva-pošta“",
+    "lat": 45.803056,
+    "lon": 15.709806,
+    "osm_name": "Gajeva"
+  },
+  "bregansko_selo": {
+    "name": "Bregansko Selo",
+    "lat": 45.838722,
+    "lon": 15.663833
+  },
+  "grdanjci_1": {
+    "name": "Grdanjci 1",
+    "lat": 45.825222,
+    "lon": 15.648361
+  },
+  "grdanjci_centar": {
+    "name": "Grdanjci - centar",
+    "lat": 45.820778,
+    "lon": 15.643389
+  },
+  "otrusevec_grgos": {
+    "name": "Otruševec „Grgos“",
+    "lat": 45.819167,
+    "lon": 15.678333
+  },
+  "otrusevec_igomat": {
+    "name": "Otruševec – „Igomat“",
+    "lat": 45.817250,
+    "lon": 15.677583
+  },
+  "otrusevec_groblje": {
+    "name": "Otruševec - groblje",
+    "lat": 45.812694,
+    "lon": 15.683250
+  },
+  "otrusevec_kod_kriza": {
+    "name": "Otruševec – „kod križa“",
+    "lat": 45.815278,
+    "lon": 15.679167
+  },
+  "mala_jazbina_73b": {
+    "name": "Mala Jazbina - k.br. 73b",
+    "lat": 45.816972,
+    "lon": 15.680056
+  },
+  "mala_jazbina_66a": {
+    "name": "Mala Jazbina - k.br. 66a",
+    "lat": 45.821083,
+    "lon": 15.683806
+  },
+  "mala_jazbina_53": {
+    "name": "Mala Jazbina - k.br. 53",
+    "lat": 45.822444,
+    "lon": 15.687333
+  },
+  "mala_jazbina_30": {
+    "name": "Mala Jazbina - k.br. 30",
+    "lat": 45.825222,
+    "lon": 15.688056
+  },
+  "mala_jazbina_8": {
+    "name": "Mala Jazbina - k.br. 8",
+    "lat": 45.828000,
+    "lon": 15.690639
+  },
+  "podvrh_volavec": {
+    "name": "Podvrh - Volavec",
+    "lat": 45.830833,
+    "lon": 15.690528
+  },
+  "velika_jazbina_kod_kriza": {
+    "name": "Velika Jazbina – kod križa",
+    "lat": 45.829972,
+    "lon": 15.688250
+  },
+  "samobor_klek_to_galgovo": {
+    "name": "Samobor „Klek“",
+    "lat": 45.804637,
+    "lon": 15.719519
+  },
+  "samobor_klek_to_ak_samobor": {
+    "name": "Samobor „Klek“",
+    "lat": 45.804284,
+    "lon": 15.720186
+  },
+  "samobor_juzno_naselje": {
+    "name": "Samobor - Južno naselje",
+    "lat": 45.801333,
+    "lon": 15.723806
+  },
+  "mala_rakovica": {
+    "name": "Mala Rakovica",
+    "lat": 45.784944,
+    "lon": 15.725917
+  },
+  "samobor_sabaric": {
+    "name": "Samobor „Šabarić“",
+    "lat": 45.799000,
+    "lon": 15.722583
+  },
+  "mirnovecka_vojarna": {
+    "name": "Mirnovečka - vojarna",
+    "lat": 45.796583,
+    "lon": 15.720194
+  },
+  "mirnovecka_rotor": {
+    "name": "Mirnovečka ulica - rotor",
+    "lat": 45.793361,
+    "lon": 15.719583
+  },
+  "velika_rakovica_mirnovec": {
+    "name": "Velika Rakovica „Mirnovec“",
+    "lat": 45.786194,
+    "lon": 15.723889
+  },
+  "kladje_prigorska": {
+    "name": "Kladje „Prigorska ulica“",
+    "lat": 45.782667,
+    "lon": 15.728472,
+    "osm_name": "Kladje"
+  },
+  "kladje_drustveni_dom": {
+    "name": "Kladje – Društveni dom",
+    "lat": 45.779472,
+    "lon": 15.732361,
+    "osm_name": "Kladje-okretište"
+  },
+  "kladje_baltin_jarek": {
+    "name": "Kladje – Baltin Jarek",
+    "lat": 45.773361,
+    "lon": 15.733389,
+    "osm_name": "Dugava"
+  },
+  "galgovo_trg_sv_roka": {
+    "name": "Galgovo – Trg Sv. Roka",
+    "lat": 45.743750,
+    "lon": 15.748889
+  },
+  "sv_martin_groblje": {
+    "name": "Sv. Martin - groblje",
+    "lat": 45.748778,
+    "lon": 15.743667
+  },
+  "dugava_14": {
+    "name": "Dugava - k.br. 14",
+    "lat": 45.767917,
+    "lon": 15.738694
+  },
+  "dugava_milecki": {
+    "name": "Dugava „Milečki“",
+    "lat": 45.766278,
+    "lon": 15.734833
+  },
+  "konsscica_sv_josip": {
+    "name": "Konšćica - Sv. Josip",
+    "lat": 45.763944,
+    "lon": 15.732111
+  },
+  "konsscica_trgovina": {
+    "name": "Konšćica - trgovina",
+    "lat": 45.765444,
+    "lon": 15.726444
+  },
+  "donja_konsscica": {
+    "name": "Donja Konšćica",
+    "lat": 45.760639,
+    "lon": 15.728722
+  },
+  "sv_martin_posta": {
+    "name": "Sv. Martin - pošta",
+    "lat": 45.749111,
+    "lon": 15.736639
+  },
+  "samobor_smidhenova": {
+    "name": "Samobor - „Šmidhenova“",
+    "lat": 45.803472,
+    "lon": 15.709444
+  },
+  "straznicka_os_samobor": {
+    "name": "Stražnička - OŠ Samobor",
+    "lat": 45.803444,
+    "lon": 15.707139
+  },
+  "vrhovcak_pod_brezom": {
+    "name": "Vrhovčak - Pod brezom",
+    "lat": 45.807354,
+    "lon": 15.705131
+  },
+  "vrhovcak_bacanka": {
+    "name": "Vrhovčak - „Bačanka“",
+    "lat": 45.808815,
+    "lon": 15.689765
+  },
+  "vrhovcak_pusine": {
+    "name": "Vrhovčak – Pušine",
+    "lat": 45.808289,
+    "lon": 15.695154
+  },
+  "vrhovcak_naselje": {
+    "name": "Vrhovčak - naselje",
+    "lat": 45.807028,
+    "lon": 15.698722
+  },
+  "ulica_ivana_perkovca_11": {
+    "name": "Ulica Ivana Perkovca - k.br. 11",
+    "lat": 45.801528,
+    "lon": 15.712306
+  },
+  "zagrebacka_ulica_ne_klek": {
+    "name": "Zagrebačka ulica",
+    "lat": 45.805389,
+    "lon": 15.721472
+  },
+  "ulica_sv_ane_groblje": {
+    "name": "Ulica Sv. Ane - groblje",
+    "lat": 45.799389,
+    "lon": 15.710306
+  },
+  "zagrebacka_ulica_sw_klek": {
+    "name": "Zagrebačka ulica",
+    "lat": 45.802000,
+    "lon": 15.715611
+  },
+  "okicka_26": {
+    "name": "Okićka ulica - k.br. 26",
+    "lat": 45.791389,
+    "lon": 15.712306
+  },
+  "ulica_sv_ane_tepec": {
+    "name": "Ulica Sv. Ane - Tepec",
+    "lat": 45.794278,
+    "lon": 15.707056
+  },
+  "okicka_brdrka": {
+    "name": "Okićka ulica - „Brdarka“",
+    "lat": 45.791250,
+    "lon": 15.708722
+  },
+  "ulica_ise_velikanovica": {
+    "name": "Ulica Ise Velikanovića",
+    "lat": 45.790444,
+    "lon": 15.714028
+  },
+  "eugena_kumicica": {
+    "name": "Eugena Kumičića",
+    "lat": 45.803583,
+    "lon": 15.726000
+  },
+  "ulica_ivana_gundulica_19": {
+    "name": "Ulica Ivana Gundulića - k.br. 19",
+    "lat": 45.796861,
+    "lon": 15.729167
+  },
+  "cirilometodska_19": {
+    "name": "Ćirilometodska ulica - k.br. 19",
+    "lat": 45.801667,
+    "lon": 15.730972
+  },
+  "ulica_dobrise_cesarica_6": {
+    "name": "Ulica Dobriše Cesarića - k.br. 6",
+    "lat": 45.799583,
+    "lon": 15.732194
+  },
+  "ulica_ivana_perkovca_ivana_veroneka": {
+    "name": "Ulica Ivana Perkovca – Ivana Veroneka",
+    "lat": 45.796139,
+    "lon": 15.726250
+  },
+  "ulica_ivana_perkovca_klara": {
+    "name": "Ulica Ivana Perkovca – „Klara“",
+    "lat": 45.797944,
+    "lon": 15.722194
+  },
+  "ulica_grada_wirgesa_perivoj": {
+    "name": "Ulica grada Wirgesa - Perivoj",
+    "lat": 45.840028,
+    "lon": 15.688361
+  },
+  "samoborski_vrtovi": {
+    "name": "Samoborski Vrtovi",
+    "lat": 45.817278,
+    "lon": 15.712139
+  },
+  "bobovica_koncar": {
+    "name": "Bobovica „Končar“",
+    "lat": 45.824989,
+    "lon": 15.713744
+  },
+  "bobovica_centar": {
+    "name": "Bobovica - centar",
+    "lat": 45.830583,
+    "lon": 15.714444
+  },
+  "otok_obranici": {
+    "name": "Otok „Obranići“",
+    "lat": 45.835694,
+    "lon": 15.719722
+  },
+  "otok_levojevici": {
+    "name": "Otok „Levojevići“",
+    "lat": 45.837889,
+    "lon": 15.722972
+  },
+  "gradna_kapelica": {
+    "name": "Gradna - kapelica",
+    "lat": 45.822015,
+    "lon": 15.736735
+  },
+  "gradna_1": {
+    "name": "Gradna 1",
+    "lat": 45.821944,
+    "lon": 15.730056
+  },
+  "otok_dva_ribica": {
+    "name": "Otok „Dva ribića“",
+    "lat": 45.841417,
+    "lon": 15.724194
+  },
+  "otok_vatrogasni_dom": {
+    "name": "Otok „Vatrogasni dom“",
+    "lat": 45.837639,
+    "lon": 15.731917
+  },
+  "savrscak": {
+    "name": "Savršćak",
+    "lat": 45.830472,
+    "lon": 15.756806
+  },
+  "celine_centar": {
+    "name": "Celine - centar",
+    "lat": 45.828405,
+    "lon": 15.746306
+  },
+  "celine_radeki": {
+    "name": "Celine - Radeki",
+    "lat": 45.829528,
+    "lon": 15.751861
+  },
+  "ulica_osisce": {
+    "name": "Ulica Osišće",
+    "lat": 45.832083,
+    "lon": 15.731056
+  },
+  "otok_okretiste": {
+    "name": "Otok - okretište",
+    "lat": 45.835500,
+    "lon": 15.733472
+  },
+  "vrbovec_to_samobor": {
+    "name": "Vrbovec",
+    "lat": 45.828083,
+    "lon": 15.764028
+  },
+  "vrbovec_to_medsave": {
+    "name": "Vrbovec",
+    "lat": 45.828250,
+    "lon": 15.764972
+  },
+  "medsave_dinamo": {
+    "name": "Medsave - Dinamo",
+    "lat": 45.832389,
+    "lon": 15.768056
+  },
+  "medsave_okretiste": {
+    "name": "Medsave – okretište",
+    "lat": 45.833694,
+    "lon": 15.773500
+  }
+}

@@ -1,0 +1,316 @@
+{
+  "S1": {
+  "name": "S1",
+  "operator": "Samoborček",
+  "color": "#e51e2a",
+  "description": "Samobor AK - Giznik/Anindol - Podloznice - Kolodvorsko naselje - Samobor AK (kružna linija)",
+  "directions": {
+    "circular": {
+      "name": "Samobor AK → Samobor AK",
+      "destination": "Samobor AK",
+      "stops": [
+        "samobor_ak",
+        "samobor_klek_to_galgovo",
+        "zagrebacka_ulica_sw_klek",
+        "ulica_ivana_perkovca_11",
+        "ulica_sv_ane_groblje",
+        "ulica_sv_ane_tepec",
+        "okicka_brdrka",
+        "okicka_26",
+        "ulica_ise_velikanovica",
+        "mirnovecka_rotor",
+        "mirnovecka_vojarna",
+        "ulica_ivana_perkovca_klara",
+        "ulica_ivana_perkovca_ivana_veroneka",
+        "ulica_ivana_gundulica_19",
+        "ulica_dobrise_cesarica_6",
+        "cirilometodska_19",
+        "eugena_kumicica",
+        "zagrebacka_ulica_ne_klek",
+        "dom_zdravlja_to_samobor",
+        "samobor_ak"
+      ]
+    }
+  }
+},
+  "S2": {
+    "name": "S2",
+    "operator": "Samoborček",
+    "color": "#a0cc3a",
+    "description": "Samobor AK - Bregana",
+    "directions": {
+      "to_bregana": {
+        "name": "Samobor AK → Bregana",
+        "destination": "Bregana – okretište",
+        "stops": [
+          "samobor_ak",
+          "dom_zdravlja_to_bregana",
+          "igraliste",
+          "sv_helena",
+          "cvjetno_naselje",
+          "bistrec",
+          "lug_samoborski",
+          "velika_jazbina",
+          "podvrh",
+          "bregana_trznica",
+          "bregana_okretiste"
+        ]
+      },
+      "to_samobor": {
+        "name": "Bregana → Samobor AK",
+        "destination": "Samobor AK",
+        "stops": [
+          "bregana_okretiste",
+          "bregana_trznica",
+          "podvrh",
+          "velika_jazbina",
+          "lug_samoborski",
+          "bistrec",
+          "cvjetno_naselje",
+          "sv_helena",
+          "igraliste",
+          "gajeva_posta",
+          "dom_zdravlja_to_samobor",
+          "samobor_ak"
+        ]
+      }
+    }
+  },
+  "S3": {
+    "name": "S3",
+    "operator": "Samoborček",
+    "color": "#0d72ba",
+    "description": "Samobor AK - Galgovo",
+    "directions": {
+      "to_galgovo": {
+        "name": "Samobor AK → Galgovo",
+        "destination": "Galgovo – Trg Sv. Roka",
+        "stops": [
+          "samobor_ak",
+          "samobor_klek_to_galgovo",
+          "samobor_juzno_naselje",
+          "samobor_sabaric",
+          "mirnovecka_vojarna",
+          "mala_rakovica",
+          "velika_rakovica_mirnovec",
+          "kladje_prigorska",
+          "kladje_drustveni_dom",
+          "kladje_baltin_jarek",
+          "dugava_14",
+          "dugava_milecki",
+          "konsscica_sv_josip",
+          "konsscica_trgovina",
+          "donja_konsscica",
+          "sv_martin_posta",
+          "sv_martin_groblje",
+          "galgovo_trg_sv_roka"
+        ]
+      },
+      "to_samobor": {
+        "name": "Galgovo → Samobor AK",
+        "destination": "Samobor AK",
+        "stops": [
+          "galgovo_trg_sv_roka",
+          "sv_martin_groblje",
+          "sv_martin_posta",
+          "donja_konsscica",
+          "konsscica_trgovina",
+          "konsscica_sv_josip",
+          "dugava_milecki",
+          "dugava_14",
+          "kladje_baltin_jarek",
+          "kladje_drustveni_dom",
+          "kladje_prigorska",
+          "velika_rakovica_mirnovec",
+          "mala_rakovica",
+          "mirnovecka_rotor",
+          "mirnovecka_vojarna",
+          "samobor_sabaric",
+          "samobor_juzno_naselje",
+          "samobor_klek_to_ak_samobor",
+          "samobor_ak"
+        ]
+      }
+    }
+  },
+  "S5": {
+    "name": "S5",
+    "color": "#004532",
+    "directions": {
+      "to_medsave": {
+        "name": "Samobor AK → Medsave",
+        "stops": [
+          "samobor_ak",
+          "samoborski_vrtovi",
+          "bobovica_koncar",
+          "bobovica_centar",
+          "otok_obranici",
+          "otok_levojevici",
+          "otok_dva_ribica",
+          "otok_vatrogasni_dom",
+          "otok_okretiste",
+          "ulica_osisce",
+          "gradna_1",
+          "gradna_kapelica",
+          "celine_centar",
+          "celine_radeki",
+          "savrscak",
+          "vrbovec_to_medsave",
+          "medsave_dinamo",
+          "medsave_okretiste"
+        ]
+      },
+      "to_samobor": {
+        "name": "Medsave → Samobor AK",
+        "stops": [
+          "medsave_okretiste",
+          "medsave_dinamo",
+          "vrbovec_to_samobor",
+          "savrscak",
+          "celine_radeki",
+          "celine_centar",
+          "gradna_kapelica",
+          "gradna_1",
+          "ulica_osisce",
+          "otok_okretiste",
+          "otok_vatrogasni_dom",
+          "otok_dva_ribica",
+          "otok_levojevici",
+          "otok_obranici",
+          "bobovica_centar",
+          "bobovica_koncar",
+          "samoborski_vrtovi",
+          "samobor_ak"
+        ]
+      }
+    }
+  },
+  "S12": {
+    "name": "S12",
+    "operator": "Samoborček",
+    "color": "#d9e026",
+    "description": "Bregana – Velika Jazbina – Otruševec – Mala Jazbina – Bregana (kružna linija)",
+    "directions": {
+      "to_otrusevec_groblje": {
+        "name": "Bregana → Velika Jazbina → Otruševec",
+        "destination": "Otruševec - groblje",
+        "stops": [
+          "bregana_okretiste",
+          "bregana_trznica",
+          "podvrh_volavec",
+          "velika_jazbina_kod_kriza",
+          "otrusevec_grgos",
+          "otrusevec_igomat",
+          "otrusevec_kod_kriza",
+          "otrusevec_groblje"
+        ]
+      },
+      "to_bregana": {
+        "name": "Otruševec → Mala Jazbina → Velika Jazbina → Bregana",
+        "destination": "Bregana - okretište",
+        "stops": [
+          "otrusevec_groblje",
+          "otrusevec_kod_kriza",
+          "mala_jazbina_73b",
+          "mala_jazbina_66a",
+          "mala_jazbina_53",
+          "mala_jazbina_30",
+          "mala_jazbina_8",
+          "velika_jazbina",
+          "podvrh",
+          "bregana_trznica",
+          "bregana_okretiste"
+        ]
+      }
+    }
+  },
+  "S13": {
+    "name": "S13",
+    "operator": "Samoborček",
+    "color": "#00925a",
+    "description": "Samobor AK - Bregana - Grdanjci",
+    "directions": {
+      "to_grdanjci": {
+        "name": "Samobor AK → Grdanjci",
+        "destination": "Grdanjci – centar",
+        "stops": [
+          "samobor_ak",
+          "dom_zdravlja_to_bregana",
+          "igraliste",
+          "sv_helena",
+          "cvjetno_naselje",
+          "bistrec",
+          "lug_samoborski",
+          "velika_jazbina",
+          "podvrh",
+          "bregana_trznica",
+          "bregana_okretiste",
+          "bregansko_selo",
+          "grdanjci_1",
+          "grdanjci_centar"
+        ]
+      },
+      "to_samobor": {
+        "name": "Grdanjci → Samobor AK",
+        "destination": "Samobor AK",
+        "stops": [
+          "grdanjci_centar",
+          "grdanjci_1",
+          "bregansko_selo",
+          "bregana_okretiste",
+          "bregana_trznica",
+          "podvrh",
+          "velika_jazbina",
+          "lug_samoborski",
+          "bistrec",
+          "cvjetno_naselje",
+          "sv_helena",
+          "igraliste",
+          "gajeva_posta",
+          "dom_zdravlja_to_samobor",
+          "samobor_ak"
+        ]
+      }
+    }
+  },
+  "S16": {
+    "name": "S16",
+    "operator": "Samoborček",
+    "color": "#e79d23",
+    "description": "Samobor AK - Vrhovčak - Otruševec",
+    "directions": {
+      "to_otrusevec": {
+        "name": "Samobor AK → Otruševec",
+        "destination": "Otruševec - „kod križa“",
+        "stops": [
+          "samobor_ak",
+          "dom_zdravlja_to_bregana",
+          "samobor_smidhenova",
+          "straznicka_os_samobor",
+          "vrhovcak_pod_brezom",
+          "vrhovcak_naselje",
+          "vrhovcak_pusine",
+          "vrhovcak_bacanka",
+          "otrusevec_groblje",
+          "otrusevec_kod_kriza"
+        ]
+      },
+      "to_samobor": {
+        "name": "Otruševec → Samobor AK",
+        "destination": "Samobor AK",
+        "stops": [
+          "otrusevec_kod_kriza",
+          "otrusevec_groblje",
+          "vrhovcak_bacanka",
+          "vrhovcak_pusine",
+          "vrhovcak_naselje",
+          "vrhovcak_pod_brezom",
+          "straznicka_os_samobor",
+          "gajeva_posta",
+          "dom_zdravlja_to_samobor",
+          "samobor_ak"
+        ]
+      }
+    }
+  }
+}

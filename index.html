@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samobor Bus Map</title>
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        #panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+            min-width: 190px;
+        }
+        #panel h2 {
+            margin: 0 0 10px;
+            font-size: 18px;
+        }
+        #status {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        #route-list {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        .route-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            user-select: none;
+        }
+        .route-checkbox input {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            cursor: pointer;
+            accent-color: var(--route-color);
+        }
+        .route-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        .stop-marker {
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 3px solid var(--route-color);
+            border-radius: 50%;
+            box-sizing: border-box;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+        }
+        .direction-arrow {
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow:
+                0 0 2px rgba(0, 0, 0, 0.95),
+                0 0 3px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+<div id="panel">
+    <h2>Samobor Bus Map</h2>
+    <div id="status">
+        Loading...
+    </div>
+    <div id="route-list"></div>
+</div>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const ROUTES_FILE = "data/routes.json";
+const STOPS_FILE = "data/stops.json";
+const OSRM_URL =
+    "https://router.project-osrm.org/route/v1/driving";
+const DIFFERENCE_DISTANCE = 25;
+const ARROW_SPACING = 400;
+const stopMarkers = {};
+// ==================================================
+// ROUTE FIXES
+// ==================================================
+
+const ROUTE_VIA_POINTS = {
+    // S1
+    "S1:circular": [],
+
+    // S2
+    "S2:to_bregana": [
+    [15.687814, 45.839963],
+    [15.688004, 45.840144],
+    [15.688363, 45.840021]
+    ],
+    "S2:to_samobor": [],
+
+    // S12
+    "S12:to_otrusevec_groblje": [
+    [15.687814, 45.839963],
+    [15.688004, 45.840144],
+    [15.688363, 45.840021]
+    ]
+};
+
+const ROUTE_BLACKLIST = {
+    "S13:to_samobor": [
+        [15.688637, 45.839810],
+        [15.688758, 45.838980],
+        [15.688541, 45.838289]
+    ],
+    "S13:to_grdanjci": [
+        [15.688637, 45.839810],
+        [15.688758, 45.838980],
+        [15.688541, 45.838289]
+    ]
+};
+
+const ROUTE_BLACKLIST_DISTANCE = 40;
+
+let map;
+let routesData;
+let stopsData;
+const routeLayers = {};
+// ==================================================
+// MAP
+// ==================================================
+function createMap() {
+    map = L.map("map");
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom: 19,
+            attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }
+    ).addTo(map);
+    map.setView(
+        [45.815, 15.705],
+        13
+    );
+}
+// ==================================================
+// LOAD DATA
+// ==================================================
+async function loadData() {
+    const [
+        routesResponse,
+        stopsResponse
+    ] = await Promise.all([
+        fetch(ROUTES_FILE),
+        fetch(STOPS_FILE)
+    ]);
+    if (!routesResponse.ok) {
+        throw new Error(
+            `Could not load ${ROUTES_FILE}`
+        );
+    }
+    if (!stopsResponse.ok) {
+        throw new Error(
+            `Could not load ${STOPS_FILE}`
+        );
+    }
+    routesData =
+        await routesResponse.json();
+    stopsData =
+        await stopsResponse.json();
+}
+// ==================================================
+// STOP LOOKUP
+// ==================================================
+function getStop(stopId) {
+    const stop =
+        stopsData[stopId];
+    if (!stop) {
+        console.warn(
+            `Unknown stop: ${stopId}`
+        );
+        return null;
+    }
+    return stop;
+}
+// ==================================================
+// CREATE ROUTE CHECKLIST
+// ==================================================
+function createRouteChecklist() {
+    const list =
+        document.getElementById(
+            "route-list"
+        );
+    list.innerHTML = "";
+    for (
+        const [
+            routeId,
+            routeInfo
+        ] of Object.entries(routesData)
+    ) {
+        routeLayers[routeId] = {
+            lines: [],
+            arrows: [],
+            stops: []
+        };
+        const label =
+            document.createElement("label");
+        label.className =
+            "route-checkbox";
+        label.style.setProperty(
+            "--route-color",
+            routeInfo.color
+        );
+        const checkbox =
+            document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = true;
+        checkbox.dataset.route =
+            routeId;
+        const color =
+            document.createElement("span");
+        color.className =
+            "route-color";
+        color.style.backgroundColor =
+            routeInfo.color;
+        const text =
+            document.createElement("span");
+        text.textContent =
+            routeInfo.name || routeId;
+        label.appendChild(
+            checkbox
+        );
+        label.appendChild(
+            color
+        );
+        label.appendChild(
+            text
+        );
+        checkbox.addEventListener(
+            "change",
+            () => {
+                setRouteVisibility(
+                    routeId,
+                    checkbox.checked
+                );
+            }
+        );
+        list.appendChild(label);
+    }
+}
+// ==================================================
+// SHOW / HIDE ROUTE
+// ==================================================
+// ==================================================
+// SHOW / HIDE ROUTE
+// ==================================================
+function setRouteVisibility(
+    routeId,
+    visible
+) {
+    const layers =
+        routeLayers[routeId];
+
+    if (!layers) {
+        return;
+    }
+
+    // Only lines and arrows respond to
+    // the route checkbox.
+    const allLayers = [
+        ...layers.lines,
+        ...layers.arrows
+    ];
+
+    for (
+        const layer of allLayers
+    ) {
+        if (visible) {
+            if (!map.hasLayer(layer)) {
+                layer.addTo(map);
+            }
+        } else {
+            if (map.hasLayer(layer)) {
+                map.removeLayer(layer);
+            }
+        }
+    }
+}
+
+
+// ==================================================
+// GET ROUTES SERVING STOP
+// ==================================================
+function getRoutesAtStop(
+    stopId
+) {
+    const results = [];
+
+    for (
+        const [
+            routeId,
+            routeInfo
+        ] of Object.entries(routesData)
+    ) {
+        for (
+            const [
+                directionId,
+                direction
+            ] of Object.entries(
+                routeInfo.directions
+            )
+        ) {
+            if (
+                direction.stops.includes(
+                    stopId
+                )
+            ) {
+                results.push({
+                    routeId,
+                    routeName:
+                        routeInfo.name ||
+                        routeId,
+                    directionId,
+                    directionName:
+                        direction.name ||
+                        direction.destination ||
+                        ""
+                });
+            }
+        }
+    }
+
+    return results;
+}
+// ==================================================
+// DRAW / UPDATE SHARED STOP
+// ==================================================
+function drawStop(
+    stopId,
+    routeId,
+    routeColor
+) {
+    const stop =
+        getStop(stopId);
+
+    if (!stop) {
+        return;
+    }
+
+    // ----------------------------------------------
+    // If this physical stop already has a marker,
+    // just update its route colors.
+    // ----------------------------------------------
+    if (stopMarkers[stopId]) {
+        const marker =
+            stopMarkers[stopId];
+
+        if (
+            !marker.routeColors.includes(
+                routeColor
+            )
+        ) {
+            marker.routeColors.push(
+                routeColor
+            );
+
+            updateStopMarker(
+                stopId
+            );
+        }
+
+        return;
+    }
+
+    // ----------------------------------------------
+    // Create new shared marker.
+    // ----------------------------------------------
+    const marker =
+        L.marker(
+            [
+                stop.lat,
+                stop.lon
+            ],
+            {
+                icon: L.divIcon({
+                    className: "",
+                    html: "",
+                    iconSize: [
+                        18,
+                        18
+                    ],
+                    iconAnchor: [
+                        9,
+                        9
+                    ]
+                })
+            }
+        );
+
+    marker.routeColors = [
+        routeColor
+    ];
+
+    stopMarkers[stopId] =
+        marker;
+
+    updateStopMarker(
+        stopId
+    );
+
+    // ----------------------------------------------
+    // Popup
+    // ----------------------------------------------
+    updateStopPopup(
+        stopId
+    );
+
+    marker.addTo(map);
+}
+
+
+// ==================================================
+// UPDATE STOP MARKER APPEARANCE
+// ==================================================
+function updateStopMarker(
+    stopId
+) {
+    const marker =
+        stopMarkers[stopId];
+
+    if (!marker) {
+        return;
+    }
+
+    const colors =
+        marker.routeColors;
+
+    let html = "";
+
+    if (
+        colors.length === 1
+    ) {
+        html =
+            `<div
+                class="stop-marker"
+                style="
+                    --route-color:${colors[0]};
+                "
+            ></div>`;
+    } else {
+        /*
+         * Multiple route colors.
+         *
+         * Each color gets an equal slice of the
+         * circular marker.
+         */
+        const step =
+            360 / colors.length;
+
+        const stops =
+            colors.map(
+                (
+                    color,
+                    index
+                ) =>
+                    `${color} ${
+                        index * step
+                    }deg ${
+                        (index + 1) * step
+                    }deg`
+            ).join(", ");
+
+        html =
+            `<div
+                class="stop-marker"
+                style="
+                    background: conic-gradient(
+                        ${stops}
+                    );
+                "
+            ></div>`;
+    }
+
+    marker.setIcon(
+        L.divIcon({
+            className: "",
+            html: html,
+            iconSize: [
+                18,
+                18
+            ],
+            iconAnchor: [
+                9,
+                9
+            ]
+        })
+    );
+}
+
+
+// ==================================================
+// UPDATE STOP POPUP
+// ==================================================
+// ==================================================
+// UPDATE STOP POPUP
+// ==================================================
+function updateStopPopup(
+    stopId
+) {
+    const marker =
+        stopMarkers[stopId];
+
+    const stop =
+        getStop(stopId);
+
+    if (
+        !marker ||
+        !stop
+    ) {
+        return;
+    }
+
+    let popup =
+        `<strong>${escapeHtml(
+            stop.name
+        )}</strong>`;
+
+    if (stop.osm_name) {
+        popup +=
+            `<br><small>OSM: ${
+                escapeHtml(
+                    stop.osm_name
+                )
+            }</small>`;
+    }
+
+    // ----------------------------------------------
+    // Get unique routes at this stop
+    // ----------------------------------------------
+    const routesAtStop =
+        getRoutesAtStop(
+            stopId
+        );
+
+    const routeIds = [];
+
+    for (
+        const route of routesAtStop
+    ) {
+        if (
+            !routeIds.includes(
+                route.routeId
+            )
+        ) {
+            routeIds.push(
+                route.routeId
+            );
+        }
+    }
+
+    if (
+        routeIds.length
+    ) {
+        popup +=
+            `<br><br>`;
+
+        for (
+            const routeId of routeIds
+        ) {
+            const routeInfo =
+                routesData[
+                    routeId
+                ];
+
+            if (!routeInfo) {
+                continue;
+            }
+
+            popup +=
+                `<span style="
+                    display:inline-block;
+                    padding:3px 8px;
+                    margin:2px;
+                    border-radius:4px;
+                    background:${routeInfo.color};
+                    color:white;
+                    font-weight:bold;
+                    font-size:12px;
+                ">${escapeHtml(
+                    routeId
+                )}</span>`;
+        }
+    }
+
+    marker.bindPopup(
+        popup
+    );
+}
+// ==================================================
+// DRAW DIRECTION STOPS
+// ==================================================
+function drawDirectionStops(
+    routeId,
+    direction,
+    color
+) {
+    for (
+        const stopId of
+        direction.stops
+    ) {
+        drawStop(
+            stopId,
+            routeId,
+            color
+        );
+    }
+}
+// ==================================================
+// GET OSRM ROUTE
+// ==================================================
+async function getRoute(
+    direction,
+    routeId = null,
+    directionId = null
+) {
+    if (!direction || !direction.stops) {
+        throw new Error(
+            "Invalid route direction."
+        );
+    }
+
+    const coordinates =
+        direction.stops.map(
+            stopId => {
+                const stop =
+                    getStop(stopId);
+
+                if (!stop) {
+                    throw new Error(
+                        `Missing stop: ${stopId}`
+                    );
+                }
+
+                // OSRM uses [lon, lat]
+                return [
+                    stop.lon,
+                    stop.lat
+                ];
+            }
+        );
+
+    if (
+        coordinates.length < 2
+    ) {
+        throw new Error(
+            "Route needs at least two stops."
+        );
+    }
+
+    // ==================================================
+    // HARD-CODED VIA POINTS
+    // ==================================================
+
+    const key =
+        routeId && directionId
+            ? `${routeId}:${directionId}`
+            : null;
+
+    const viaPoints =
+        key
+            ? (
+                ROUTE_VIA_POINTS[key] ||
+                []
+            )
+            : [];
+
+    /*
+     * Insert via-points immediately before the
+     * final stop.
+     *
+     * For S13:
+     *
+     * to_grdanjci:
+     * Bregana okretište
+     *        ↓
+     * manual section
+     *        ↓
+     * Bregansko Selo
+     *
+     * to_samobor:
+     * Bregansko Selo
+     *        ↓
+     * manual section
+     *        ↓
+     * Bregana okretište
+     */
+    if (
+        viaPoints.length
+    ) {
+        coordinates.splice(
+            coordinates.length - 1,
+            0,
+            ...viaPoints
+        );
+    }
+
+    // ==================================================
+    // OSRM
+    // ==================================================
+
+    const url =
+        `${OSRM_URL}/` +
+        `${coordinates
+            .map(
+                ([lon, lat]) =>
+                    `${lon},${lat}`
+            )
+            .join(";")}` +
+        `?overview=full` +
+        `&geometries=geojson` +
+        `&steps=false` +
+        `&alternatives=false`;
+
+    const response =
+        await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(
+            `OSRM HTTP ${response.status}`
+        );
+    }
+
+    const data =
+        await response.json();
+
+    if (
+        data.code !== "Ok" ||
+        !data.routes ||
+        !data.routes.length
+    ) {
+        throw new Error(
+            "OSRM could not route this direction."
+        );
+    }
+
+    return data.routes[0];
+}
+// ==================================================
+// DRAW ROUTE LINE
+// ==================================================
+function drawRoute(
+    routeId,
+    routeInfo,
+    direction,
+    route
+) {
+    if (!route || !route.geometry) {
+        return;
+    }
+    const layer =
+        L.geoJSON(
+            route.geometry,
+            {
+                style: {
+                    color:
+                        routeInfo.color,
+                    weight: 6,
+                    opacity: 0.9
+                }
+            }
+        );
+    layer.bindPopup(`
+        <strong>
+            ${escapeHtml(
+                routeInfo.name
+            )}
+        </strong>
+        <br>
+        ${escapeHtml(
+            direction.name ||
+            direction.destination ||
+            ""
+        )}
+        <br>
+        ${(route.distance / 1000).toFixed(1)}
+        km
+    `);
+    layer.addTo(map);
+    routeLayers[routeId]
+        .lines
+        .push(layer);
+}
+// ==================================================
+// DIRECTION ARROWS
+// ==================================================
+function addDirectionArrows(
+    routeId,
+    geometry,
+    otherGeometry = null
+) {
+    if (
+        !geometry ||
+        !geometry.coordinates ||
+        geometry.coordinates.length < 2
+    ) {
+        return;
+    }
+    const coordinates =
+        geometry.coordinates;
+    /*
+     * ==================================================
+     * TWO-DIRECTION ROUTES
+     * ==================================================
+     *
+     * S2 / S13:
+     * arrows only where the two directions differ.
+     */
+    if (otherGeometry) {
+        let differentDistance = 0;
+        let previousWasDifferent =
+            false;
+        for (
+            let i = 1;
+            i < coordinates.length;
+            i++
+        ) {
+            const previous =
+                coordinates[i - 1];
+            const current =
+                coordinates[i];
+            const segmentDistance =
+                distance(
+                    previous[1],
+                    previous[0],
+                    current[1],
+                    current[0]
+                );
+            const distanceToOther =
+                distanceToLine(
+                    current,
+                    otherGeometry
+                );
+            const isDifferent =
+                distanceToOther >
+                DIFFERENCE_DISTANCE;
+            if (!isDifferent) {
+                if (
+                    previousWasDifferent &&
+                    differentDistance > 40
+                ) {
+                    addArrow(
+                        routeId,
+                        previous,
+                        current
+                    );
+                }
+                differentDistance = 0;
+                previousWasDifferent =
+                    false;
+                continue;
+            }
+            differentDistance +=
+                segmentDistance;
+            if (!previousWasDifferent) {
+                addArrow(
+                    routeId,
+                    previous,
+                    current
+                );
+                differentDistance = 0;
+            } else if (
+                differentDistance >=
+                ARROW_SPACING
+            ) {
+                addArrow(
+                    routeId,
+                    previous,
+                    current
+                );
+                differentDistance = 0;
+            }
+            previousWasDifferent =
+                true;
+        }
+        return;
+    }
+    /*
+     * ==================================================
+     * ONE-DIRECTION / CIRCULAR ROUTES
+     * ==================================================
+     *
+     * S12.
+     *
+     * Arrows are more frequent than the normal
+     * two-direction arrows.
+     *
+     * We also avoid putting arrows on top of a section
+     * of road that the route has already traversed.
+     */
+    const SINGLE_DIRECTION_SPACING = 120;
+    const OVERLAP_DISTANCE = 25;
+    const LOOKBACK_DISTANCE = 120;
+    let distanceSinceArrow = 0;
+    /*
+     * Points from the route that have already been
+     * travelled.
+     */
+    const previousPoints = [];
+    for (
+        let i = 1;
+        i < coordinates.length;
+        i++
+    ) {
+        const previous =
+            coordinates[i - 1];
+        const current =
+            coordinates[i];
+        const segmentDistance =
+            distance(
+                previous[1],
+                previous[0],
+                current[1],
+                current[0]
+            );
+        /*
+         * Check whether this section is close to an
+         * earlier section of the same route.
+         *
+         * We deliberately only look back a reasonable
+         * distance in the route geometry. This catches
+         * things such as:
+         *
+         * kod križa
+         *      ↓
+         * groblje
+         *      ↓
+         * kod križa
+         *
+         * without treating the whole circular route
+         * as one giant overlap.
+         */
+        let overlapsEarlierRoad = false;
+        for (
+            let j = previousPoints.length - 1;
+            j >= 0;
+            j--
+        ) {
+            const oldPoint =
+                previousPoints[j];
+            const routeDistanceBack =
+                oldPoint.distanceBack;
+            if (
+                routeDistanceBack >
+                LOOKBACK_DISTANCE
+            ) {
+                break;
+            }
+            const d =
+                distance(
+                    current[1],
+                    current[0],
+                    oldPoint.point[1],
+                    oldPoint.point[0]
+                );
+            if (
+                d <= OVERLAP_DISTANCE
+            ) {
+                overlapsEarlierRoad = true;
+                break;
+            }
+        }
+        /*
+         * Remember this point.
+         */
+        previousPoints.push({
+            point: current,
+            distanceBack: 0
+        });
+        /*
+         * Age previous points.
+         */
+        for (
+            const item of previousPoints
+        ) {
+            item.distanceBack +=
+                segmentDistance;
+        }
+        /*
+         * Don't put an arrow on top of an earlier
+         * traversal of the same road.
+         */
+        if (overlapsEarlierRoad) {
+            distanceSinceArrow = 0;
+            continue;
+        }
+        distanceSinceArrow +=
+            segmentDistance;
+        /*
+         * More frequent arrows for S12.
+         */
+        if (
+            distanceSinceArrow >=
+            SINGLE_DIRECTION_SPACING
+        ) {
+            addArrow(
+                routeId,
+                previous,
+                current
+            );
+            distanceSinceArrow = 0;
+        }
+    }
+}
+// ==================================================
+// ADD ARROW
+// ==================================================
+function addArrow(
+    routeId,
+    previous,
+    current
+) {
+    /*
+     * Prevent arrows from overlapping on sections
+     * of a circular route that use the same road
+     * in opposite directions.
+     */
+    const existingArrows =
+        routeLayers[routeId]?.arrows || [];
+    const lat =
+        current[1];
+    const lon =
+        current[0];
+    for (
+        const existingArrow of existingArrows
+    ) {
+        const existingLatLng =
+            existingArrow.getLatLng();
+        const d =
+            distance(
+                lat,
+                lon,
+                existingLatLng.lat,
+                existingLatLng.lng
+            );
+        if (d < 35) {
+            return;
+        }
+    }
+    const angle =
+        bearing(
+            previous[1],
+            previous[0],
+            current[1],
+            current[0]
+        );
+    const arrow =
+        L.marker(
+            [
+                lat,
+                lon
+            ],
+            {
+                icon: L.divIcon({
+                    className:
+                        "direction-arrow",
+                    html:
+                        `<div style="
+                            transform:
+                                rotate(${angle - 90}deg);
+                        ">➤</div>`,
+                    iconSize: [
+                        14,
+                        14
+                    ],
+                    iconAnchor: [
+                        7,
+                        7
+                    ]
+                }),
+                interactive: false
+            }
+        );
+    arrow.addTo(map);
+    routeLayers[routeId]
+        .arrows
+        .push(arrow);
+}
+// ==================================================
+// DISTANCE TO LINE
+// ==================================================
+function distanceToLine(
+    point,
+    geometry
+) {
+    if (
+        !geometry ||
+        !geometry.coordinates
+    ) {
+        return Infinity;
+    }
+    const coordinates =
+        geometry.coordinates;
+    let minimum =
+        Infinity;
+    for (
+        let i = 1;
+        i < coordinates.length;
+        i++
+    ) {
+        const d =
+            distanceToSegment(
+                point,
+                coordinates[i - 1],
+                coordinates[i]
+            );
+        if (d < minimum) {
+            minimum = d;
+        }
+    }
+    return minimum;
+}
+// ==================================================
+// DISTANCE TO SEGMENT
+// ==================================================
+function distanceToSegment(
+    point,
+    a,
+    b
+) {
+    const lon =
+        point[0];
+    const lat =
+        point[1];
+    const ax =
+        a[0];
+    const ay =
+        a[1];
+    const bx =
+        b[0];
+    const by =
+        b[1];
+    const dx =
+        bx - ax;
+    const dy =
+        by - ay;
+    if (
+        dx === 0 &&
+        dy === 0
+    ) {
+        return distance(
+            lat,
+            lon,
+            ay,
+            ax
+        );
+    }
+    const t =
+        Math.max(
+            0,
+            Math.min(
+                1,
+                (
+                    (lon - ax) * dx +
+                    (lat - ay) * dy
+                ) /
+                (
+                    dx * dx +
+                    dy * dy
+                )
+            )
+        );
+    const closestLon =
+        ax + t * dx;
+    const closestLat =
+        ay + t * dy;
+    return distance(
+        lat,
+        lon,
+        closestLat,
+        closestLon
+    );
+}
+// ==================================================
+// HAVERSINE DISTANCE
+// ==================================================
+function distance(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+) {
+    const R =
+        6371000;
+    const p1 =
+        lat1 *
+        Math.PI /
+        180;
+    const p2 =
+        lat2 *
+        Math.PI /
+        180;
+    const dp =
+        (
+            lat2 - lat1
+        ) *
+        Math.PI /
+        180;
+    const dl =
+        (
+            lon2 - lon1
+        ) *
+        Math.PI /
+        180;
+    const a =
+        Math.sin(dp / 2) ** 2 +
+        Math.cos(p1) *
+        Math.cos(p2) *
+        Math.sin(dl / 2) ** 2;
+    return (
+        2 *
+        R *
+        Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(1 - a)
+        )
+    );
+}
+// ==================================================
+// BEARING
+// ==================================================
+function bearing(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+) {
+    const phi1 =
+        lat1 *
+        Math.PI /
+        180;
+    const phi2 =
+        lat2 *
+        Math.PI /
+        180;
+    const lambda =
+        (
+            lon2 - lon1
+        ) *
+        Math.PI /
+        180;
+    const y =
+        Math.sin(lambda) *
+        Math.cos(phi2);
+    const x =
+        Math.cos(phi1) *
+        Math.sin(phi2) -
+        Math.sin(phi1) *
+        Math.cos(phi2) *
+        Math.cos(lambda);
+    return (
+        Math.atan2(y, x) *
+        180 /
+        Math.PI
+    );
+}
+// ==================================================
+// FIT MAP
+// ==================================================
+function fitMap() {
+    const bounds = [];
+    for (
+        const routeInfo of
+        Object.values(routesData)
+    ) {
+        for (
+            const direction of
+            Object.values(
+                routeInfo.directions
+            )
+        ) {
+            for (
+                const stopId of
+                direction.stops
+            ) {
+                const stop =
+                    getStop(stopId);
+                if (!stop) {
+                    continue;
+                }
+                bounds.push([
+                    stop.lat,
+                    stop.lon
+                ]);
+            }
+        }
+    }
+    if (bounds.length) {
+        map.fitBounds(
+            bounds,
+            {
+                padding: [
+                    40,
+                    40
+                ]
+            }
+        );
+    }
+}
+// ==================================================
+// HTML ESCAPING
+// ==================================================
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+// ==================================================
+// DRAW ONE ROUTE
+// ==================================================
+async function drawRouteInfo(
+    routeId,
+    routeInfo
+) {
+    console.log(
+        `Loading ${routeId}...`
+    );
+
+    const directions =
+        Object.values(
+            routeInfo.directions
+        );
+
+    const directionIds =
+        Object.keys(
+            routeInfo.directions
+        );
+
+    // ----------------------------------------------
+    // A route must have 1 or 2 directions.
+    // ----------------------------------------------
+    if (
+        directions.length < 1 ||
+        directions.length > 2
+    ) {
+        console.warn(
+            `${routeId} must have 1 or 2 directions.`
+        );
+        return;
+    }
+
+    // ----------------------------------------------
+    // Draw this route's own stops.
+    // ----------------------------------------------
+    for (
+        const direction of directions
+    ) {
+        drawDirectionStops(
+            routeId,
+            direction,
+            routeInfo.color
+        );
+    }
+
+    // ----------------------------------------------
+    // Get this route's own geometry.
+    // ----------------------------------------------
+    const routeA =
+        await getRoute(
+            directions[0],
+            routeId,
+            directionIds[0]
+        );
+
+    let routeB = null;
+
+    if (
+        directions.length === 2
+    ) {
+        routeB =
+            await getRoute(
+                directions[1],
+                routeId,
+                directionIds[1]
+            );
+    }
+
+    // ----------------------------------------------
+    // Draw this route normally.
+    // ----------------------------------------------
+    drawRoute(
+        routeId,
+        routeInfo,
+        directions[0],
+        routeA
+    );
+
+    if (
+        directions.length === 2 &&
+        routeB
+    ) {
+        drawRoute(
+            routeId,
+            routeInfo,
+            directions[1],
+            routeB
+        );
+    }
+
+    // ----------------------------------------------
+    // Normal route arrows.
+    // ----------------------------------------------
+    if (
+        directions.length === 2 &&
+        routeB
+    ) {
+        addDirectionArrows(
+            routeId,
+            routeA.geometry,
+            routeB.geometry
+        );
+
+        addDirectionArrows(
+            routeId,
+            routeB.geometry,
+            routeA.geometry
+        );
+    } else {
+        addDirectionArrows(
+            routeId,
+            routeA.geometry
+        );
+    }
+
+    // ----------------------------------------------
+    // S13 FIX
+    //
+    // ALSO render S2's road geometry in S13's color.
+    //
+    // S13's own route/stops remain untouched.
+    // ----------------------------------------------
+    if (routeId === "S13") {
+        const s2Info =
+            routesData["S2"];
+
+        if (s2Info) {
+            const s2Directions =
+                Object.values(
+                    s2Info.directions
+                );
+
+            const s2DirectionIds =
+                Object.keys(
+                    s2Info.directions
+                );
+
+            const s2Routes = [];
+
+            for (
+                let i = 0;
+                i < s2Directions.length;
+                i++
+            ) {
+                try {
+                    const s2Route =
+                        await getRoute(
+                            s2Directions[i],
+                            "S2",
+                            s2DirectionIds[i]
+                        );
+
+                    s2Routes.push(
+                        s2Route
+                    );
+
+                    // Draw S2 geometry using S13's color.
+                    drawRoute(
+                        routeId,
+                        routeInfo,
+                        s2Directions[i],
+                        s2Route
+                    );
+                } catch (error) {
+                    console.error(
+                        `Could not load S2 geometry for S13:`,
+                        error
+                    );
+                }
+            }
+
+            // ------------------------------------------
+            // Add S2-style arrows to the S13 copy.
+            // ------------------------------------------
+            if (
+                s2Routes.length === 2
+            ) {
+                addDirectionArrows(
+                    routeId,
+                    s2Routes[0].geometry,
+                    s2Routes[1].geometry
+                );
+
+                addDirectionArrows(
+                    routeId,
+                    s2Routes[1].geometry,
+                    s2Routes[0].geometry
+                );
+            } else if (
+                s2Routes.length === 1
+            ) {
+                addDirectionArrows(
+                    routeId,
+                    s2Routes[0].geometry
+                );
+            }
+        }
+    }
+
+    console.log(
+        `${routeId} loaded`
+    );
+}
+// ==================================================
+// START
+// ==================================================
+async function start() {
+    try {
+        createMap();
+        await loadData();
+        /*
+         * Create checklist BEFORE drawing routes.
+         */
+        createRouteChecklist();
+        const routeEntries =
+            Object.entries(
+                routesData
+            );
+        if (!routeEntries.length) {
+            throw new Error(
+                "No routes found in routes.json."
+            );
+        }
+        /*
+         * Load every route automatically.
+         */
+        for (
+            const [
+                routeId,
+                routeInfo
+            ] of routeEntries
+        ) {
+            await drawRouteInfo(
+                routeId,
+                routeInfo
+            );
+        }
+        fitMap();
+        document
+            .getElementById("status")
+            .textContent =
+            `${routeEntries.length} routes loaded`;
+    } catch (error) {
+        console.error(error);
+        document
+            .getElementById("status")
+            .textContent =
+            `Error: ${error.message}`;
+    }
+}
+start();
+</script>
+</body>
+</html>
